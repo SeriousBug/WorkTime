@@ -1,16 +1,27 @@
 import React from 'react';
 import {projectDB, Project} from './database';
-import {Button, Card, Paragraph} from 'react-native-paper';
+import {IconButton, Card, Paragraph} from 'react-native-paper';
+import {StyleSheet} from 'react-native';
+import ScrollView from './ScrollView';
+import {AddProjectButton} from './AddProjectButton';
+import OverrideColor from './OverrideColor';
 
 type ProjectState = {
   loading: boolean;
+  addProjectDialog: boolean;
   projects: Project[];
 };
+
+const projectViewStyle = StyleSheet.create({
+  projectCard: {
+    margin: 16,
+  },
+});
 
 export default class ProjectView extends React.Component<any, ProjectState> {
   constructor(props: any) {
     super(props);
-    this.state = {loading: true, projects: []};
+    this.state = {loading: true, addProjectDialog: false, projects: []};
   }
 
   componentDidMount() {
@@ -18,15 +29,7 @@ export default class ProjectView extends React.Component<any, ProjectState> {
   }
 
   async fetchData() {
-    console.log('Yay, fetching data!');
-    // Debug!
-    await projectDB.put({
-      _id: new Date().toISOString(),
-      name: 'Develop this app',
-      color: '#000000',
-    });
-    // Debug!
-    this.setState({loading: true});
+    this.setLoading();
     try {
       const results = await projectDB.allDocs({
         include_docs: true,
@@ -44,21 +47,48 @@ export default class ProjectView extends React.Component<any, ProjectState> {
     }
   }
 
+  private setLoading() {
+    this.setState({loading: true});
+  }
+
+  async addProject() {}
+
   render() {
     return (
-      <>
+      <ScrollView>
         {this.state.projects.map((project) => (
-          <Card key={project._id}>
-            <Card.Title title={project.name} />
+          <Card key={project._id} style={projectViewStyle.projectCard}>
+            <OverrideColor color={project.color}>
+              <Card.Title title={project.name} />
+            </OverrideColor>
             <Card.Content>
               <Paragraph>12 hours this week</Paragraph>
             </Card.Content>
             <Card.Actions>
-              <Button icon="play">Start working!</Button>
+              <IconButton
+                icon="play"
+                accessibilityLabel="Start recording time"
+              />
             </Card.Actions>
           </Card>
         ))}
-      </>
+        <AddProjectButton
+          projectsLength={this.state.projects.length}
+          disabled={this.state.loading}
+          addProjectCallback={async (name, color) => {
+            if (name === '' || color === '') {
+              return;
+            }
+            this.setLoading();
+            await projectDB.put({
+              _id: new Date().toISOString(),
+              name: name,
+              color: color,
+            });
+            await this.fetchData();
+          }}
+        />
+      </ScrollView>
     );
   }
 }

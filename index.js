@@ -9,8 +9,9 @@ if (typeof process === 'undefined') {
   global.process = require('process');
 } else {
   const bProcess = require('process');
-  for (var p in bProcess) {
+  for (let p in bProcess) {
     if (!(p in process)) {
+      // noinspection JSUnfilteredForInLoop
       process[p] = bProcess[p];
     }
   }
@@ -23,60 +24,120 @@ import 'react-native-gesture-handler'; // Must be at the top
 import * as React from 'react';
 import {AppRegistry} from 'react-native';
 import {name as appName} from './app.json';
-import {Provider as PaperProvider} from 'react-native-paper';
+import {
+  DarkTheme,
+  DefaultTheme,
+  Provider as PaperProvider,
+} from 'react-native-paper';
 import {NavigationContainer} from '@react-navigation/native';
-import {createStackNavigator} from '@react-navigation/stack';
 import {createMaterialBottomTabNavigator} from '@react-navigation/material-bottom-tabs';
+import {Appearance} from 'react-native-appearance';
 import './database';
 import Home from './Home';
 import ProjectView from './ProjectView';
 import Stats from './Stats';
 import {HeaderBar} from './ActionBars';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import {useState} from 'react';
 
 //const Stack = createStackNavigator();
 const Tab = createMaterialBottomTabNavigator();
 
-function Main() {
-  useState();
+const themes = {
+  light: {
+    ...DefaultTheme,
+    roundness: 2,
+    dark: false,
+    mode: 'adaptive',
+    colors: {
+      ...DefaultTheme.colors,
+      primary: '#fc9321',
+      accent: '#35659d',
+    },
+  },
+  dark: {
+    ...DarkTheme,
+    roundness: 2,
+    dark: true,
+    mode: 'adaptive',
+    colors: {
+      ...DarkTheme.colors,
+      primary: '#fc9321',
+      accent: '#35659d',
+    },
+  },
+};
 
-  const tabIcon = (icon) => {
+export class Main extends React.Component {
+  getTheme(scheme) {
+    if (scheme === 'light') {
+      console.log('Using light theme as requested');
+      return themes.light;
+    }
+    if (scheme === 'dark' || scheme === 'no-preference') {
+      console.log(
+        'Using dark theme' +
+          (scheme === 'dark' ? 'as requested' : 'by default'),
+      );
+      return themes.dark;
+    }
+  }
+
+  constructor(props) {
+    super(props);
+
+    const colorSchemeListener = Appearance.addChangeListener(
+      ({colorScheme}) => {
+        this.setState({theme: this.getTheme(colorScheme)});
+      },
+    );
+    this.state = {
+      theme: this.getTheme(Appearance.getColorScheme()),
+      colorSchemeListener: colorSchemeListener,
+    };
+  }
+
+  componentWillUnmount() {
+    this.state.colorSchemeListener.remove();
+  }
+
+  tabIcon(icon) {
     return ({color}) => <Icon name={icon} size={20} color={color} />;
-  };
+  }
 
-  return (
-    <PaperProvider>
-      <NavigationContainer>
-        <Tab.Navigator
-          initialRouteName="Home"
-          backBehavior="initialRoute"
-          screenOptions={{header: (props) => <HeaderBar {...props} />}}>
-          <Tab.Screen
-            name="Home"
-            options={{
-              tabBarIcon: tabIcon('home'),
-            }}
-            component={Home}
-          />
-          <Tab.Screen
-            name="Project"
-            options={{
-              tabBarIcon: tabIcon('briefcase-clock'),
-            }}
-            component={ProjectView}
-          />
-          <Tab.Screen
-            name="Stats"
-            options={{
-              tabBarIcon: tabIcon('chart-line'),
-            }}
-            component={Stats}
-          />
-        </Tab.Navigator>
-      </NavigationContainer>
-    </PaperProvider>
-  );
+  render() {
+    return (
+      <PaperProvider theme={this.state.theme}>
+        <NavigationContainer>
+          <Tab.Navigator
+            initialRouteName="Home"
+            backBehavior="initialRoute"
+            screenOptions={{header: (props) => <HeaderBar {...props} />}}>
+            <Tab.Screen
+              name="Home"
+              options={{
+                tabBarIcon: this.tabIcon('home'),
+              }}
+              component={Home}
+            />
+            <Tab.Screen
+              name="Project"
+              options={{
+                tabBarIcon: this.tabIcon('briefcase-clock'),
+              }}
+              component={ProjectView}
+            />
+            <Tab.Screen
+              name="Stats"
+              options={{
+                tabBarIcon: this.tabIcon('chart-line'),
+              }}
+              component={Stats}
+            />
+          </Tab.Navigator>
+        </NavigationContainer>
+      </PaperProvider>
+    );
+  }
 }
 
 AppRegistry.registerComponent(appName, () => Main);
