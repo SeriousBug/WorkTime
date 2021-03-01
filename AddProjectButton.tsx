@@ -5,14 +5,16 @@ import {
   Button,
   TextInput,
   IconButton,
+  useTheme,
 } from 'react-native-paper';
 import {StyleSheet, View} from 'react-native';
 import OverrideColor from './OverrideColor';
+import {getColor, ThemedColor, allColors} from './color';
 
 export type AddProjectButtonProps = {
   disabled: boolean;
   projectsLength: number;
-  addProjectCallback: (name: string, color: string) => void;
+  addProjectCallback: (name: string, color: ThemedColor) => void;
 };
 
 const style = StyleSheet.create({
@@ -26,28 +28,20 @@ const style = StyleSheet.create({
   colorButtonList: {flexDirection: 'row', flexWrap: 'wrap'},
 });
 
-const PROJECT_COLORS = [
-  '#95d0fc',
-  '#eecffe',
-  '#fe83cc',
-  '#c7fdb5',
-  '#7af9ab',
-  '#ffb07c',
-  '#f29e8e',
-  '#e6daa6',
-  '#ffffe4',
-];
+const DEFAULT_COLOR = 'blue';
 
 export function AddProjectButton(props: AddProjectButtonProps) {
   const [visible, setVisible] = useState(false);
   const [name, setName] = useState('');
-  const [color, setColor] = useState('');
+  const [color, setColor] = useState(getColor(DEFAULT_COLOR));
 
-  const colorButton = (forColor: string) => (
+  const theme = useTheme();
+
+  const colorButton = (forColor: ThemedColor) => (
     <IconButton
-      key={forColor}
+      key={forColor.dark}
       icon="checkbox-blank-circle"
-      color={forColor}
+      color={theme.dark ? forColor.dark : forColor.light}
       style={style.colorButton}
       onPress={() => {
         setColor(forColor);
@@ -70,15 +64,15 @@ export function AddProjectButton(props: AddProjectButtonProps) {
           visible={visible}
           onDismiss={() => {
             setName('');
-            setColor(PROJECT_COLORS[0]);
+            setColor(getColor(DEFAULT_COLOR));
           }}>
-          <OverrideColor color={color ? color : PROJECT_COLORS[0]}>
+          <OverrideColor color={color ? color : getColor(DEFAULT_COLOR)}>
             <Dialog.Title>Add Project</Dialog.Title>
           </OverrideColor>
           <Dialog.Content>
             <TextInput label="Project name" onChangeText={setName} />
             <View style={style.colorButtonList}>
-              {PROJECT_COLORS.map(colorButton)}
+              {allColors.map(colorButton)}
             </View>
           </Dialog.Content>
           <Dialog.Actions>
@@ -87,7 +81,7 @@ export function AddProjectButton(props: AddProjectButtonProps) {
                 props.addProjectCallback(name, color);
                 setVisible(false);
                 setName('');
-                setColor(PROJECT_COLORS[0]);
+                setColor(getColor(DEFAULT_COLOR));
                 setVisible(false);
               }}>
               OK
@@ -95,7 +89,7 @@ export function AddProjectButton(props: AddProjectButtonProps) {
             <Button
               onPress={() => {
                 setName('');
-                setColor(PROJECT_COLORS[0]);
+                setColor(getColor(DEFAULT_COLOR));
                 setVisible(false);
               }}>
               Cancel

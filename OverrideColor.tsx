@@ -6,7 +6,7 @@ export default function OverrideColor(props: any) {
   let newProps = {...props};
   const theme = {...useTheme()};
   if (props.color) {
-    theme.colors.text = props.color;
+    theme.colors.text = theme.dark ? props.color.dark : props.color.light;
     newProps.theme = theme;
   } else {
     console.error('Trouble parsing color for override', props.color);

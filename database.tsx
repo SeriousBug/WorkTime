@@ -4,12 +4,13 @@ import SQLite from 'react-native-sqlite-2';
 import SQLiteAdapterFactory from 'pouchdb-adapter-react-native-sqlite';
 const SQLiteAdapter = SQLiteAdapterFactory(SQLite);
 import PouchDB from '@craftzdog/pouchdb-core-react-native';
+import {ThemedColor} from './color';
 PouchDB.plugin(SQLiteAdapter);
 
 export class Project {
   _id: string;
   name: string;
-  color: string;
+  color: ThemedColor;
 }
 
 export type TimeLog = {

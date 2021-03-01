@@ -76,7 +76,7 @@ export default class ProjectView extends React.Component<any, ProjectState> {
           projectsLength={this.state.projects.length}
           disabled={this.state.loading}
           addProjectCallback={async (name, color) => {
-            if (name === '' || color === '') {
+            if (name === '') {
               return;
             }
             this.setLoading();
