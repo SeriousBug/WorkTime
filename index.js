@@ -75,7 +75,7 @@ export class Main extends React.Component {
     }
     if (scheme === 'dark' || scheme === 'no-preference') {
       console.log(
-        'Using dark theme' +
+        'Using dark theme ' +
           (scheme === 'dark' ? 'as requested' : 'by default'),
       );
       return themes.dark;
@@ -107,7 +107,7 @@ export class Main extends React.Component {
   render() {
     return (
       <PaperProvider theme={this.state.theme}>
-        <NavigationContainer>
+        <NavigationContainer theme={this.state.theme}>
           <Tab.Navigator
             initialRouteName="Home"
             backBehavior="initialRoute"

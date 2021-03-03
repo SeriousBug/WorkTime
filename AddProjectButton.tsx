@@ -26,6 +26,10 @@ const style = StyleSheet.create({
     maxWidth: '30%',
   },
   colorButtonList: {flexDirection: 'row', flexWrap: 'wrap'},
+  dialogButton: {
+    minWidth: '20%',
+    textAlign: 'center',
+  },
 });
 
 const DEFAULT_COLOR = 'blue';
@@ -64,6 +68,7 @@ export function AddProjectButton(props: AddProjectButtonProps) {
           visible={visible}
           onDismiss={() => {
             setName('');
+            setVisible(false);
             setColor(getColor(DEFAULT_COLOR));
           }}>
           <OverrideColor color={color ? color : getColor(DEFAULT_COLOR)}>
@@ -77,6 +82,17 @@ export function AddProjectButton(props: AddProjectButtonProps) {
           </Dialog.Content>
           <Dialog.Actions>
             <Button
+              style={style.dialogButton}
+              onPress={() => {
+                setName('');
+                setColor(getColor(DEFAULT_COLOR));
+                setVisible(false);
+              }}>
+              Cancel
+            </Button>
+            <Button
+              style={style.dialogButton}
+              disabled={name === ''}
               onPress={() => {
                 props.addProjectCallback(name, color);
                 setVisible(false);
@@ -85,14 +101,6 @@ export function AddProjectButton(props: AddProjectButtonProps) {
                 setVisible(false);
               }}>
               OK
-            </Button>
-            <Button
-              onPress={() => {
-                setName('');
-                setColor(getColor(DEFAULT_COLOR));
-                setVisible(false);
-              }}>
-              Cancel
             </Button>
           </Dialog.Actions>
         </Dialog>
