@@ -53,6 +53,12 @@ export function AddProjectButton(props: AddProjectButtonProps) {
     />
   );
 
+  const reset = () => {
+    setName('');
+    setColor(getColor(DEFAULT_COLOR));
+    setVisible(false);
+  };
+
   return (
     <View style={style.container}>
       <Button
@@ -64,14 +70,8 @@ export function AddProjectButton(props: AddProjectButtonProps) {
         Add project
       </Button>
       <Portal>
-        <Dialog
-          visible={visible}
-          onDismiss={() => {
-            setName('');
-            setVisible(false);
-            setColor(getColor(DEFAULT_COLOR));
-          }}>
-          <OverrideColor color={color ? color : getColor(DEFAULT_COLOR)}>
+        <Dialog visible={visible} onDismiss={reset}>
+          <OverrideColor color={color}>
             <Dialog.Title>Add Project</Dialog.Title>
           </OverrideColor>
           <Dialog.Content>
@@ -81,13 +81,7 @@ export function AddProjectButton(props: AddProjectButtonProps) {
             </View>
           </Dialog.Content>
           <Dialog.Actions>
-            <Button
-              style={style.dialogButton}
-              onPress={() => {
-                setName('');
-                setColor(getColor(DEFAULT_COLOR));
-                setVisible(false);
-              }}>
+            <Button style={style.dialogButton} onPress={reset}>
               Cancel
             </Button>
             <Button
@@ -95,10 +89,7 @@ export function AddProjectButton(props: AddProjectButtonProps) {
               disabled={name === ''}
               onPress={() => {
                 props.addProjectCallback(name, color);
-                setVisible(false);
-                setName('');
-                setColor(getColor(DEFAULT_COLOR));
-                setVisible(false);
+                reset();
               }}>
               OK
             </Button>

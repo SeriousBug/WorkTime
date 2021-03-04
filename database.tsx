@@ -16,15 +16,40 @@ export class Project {
    *
    * Doesn't account for any ongoing work.
    */
-  duration: Duration;
+  private _duration: Duration;
+
+  get duration(): string {
+    const dur = this._duration.toFormat('h');
+    return dur === 'PT0S' ? '0' : dur;
+  }
+
+  set duration(dur: string) {
+    this._duration = Duration.fromISO(dur);
+  }
+
+  constructor(dbObject: ProjectDB) {
+    this._id = dbObject._id;
+    this.name = dbObject.name;
+    this.color = dbObject.color;
+    this.duration = dbObject.duration;
+  }
+
+  toJSON(): ProjectDB {
+    return {
+      _id: this._id,
+      name: this.name,
+      color: this.color,
+      duration: this._duration.toISO(),
+    };
+  }
 }
 
-export class ProjectDB {
+export type ProjectDB = {
   _id: string;
   name: string;
   color: ThemedColor;
   duration: string;
-}
+};
 
 export type TimeLog = {
   _id: string;

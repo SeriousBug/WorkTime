@@ -6,6 +6,7 @@ import {AddProjectButton} from './AddProjectButton';
 import OverrideColor from './OverrideColor';
 import {createStackNavigator} from '@react-navigation/stack';
 import {DateTime, Duration} from 'luxon';
+import {LoadingIcon} from './loading';
 
 type ProjectState = {
   loading: boolean;
@@ -31,23 +32,40 @@ export default function ProjectView() {
 }
 
 type ProjectSingleState = {
-  project: Project;
+  id: string;
+  project: Project | undefined;
 };
 
 class ProjectSingleView extends React.Component<any, ProjectSingleState> {
   constructor(props: any) {
     super(props);
-    this.state = {project: props.project};
+    this.state = {id: props.route.params, project: undefined};
+  }
+
+  componentDidMount() {
+    this.fetchData();
+  }
+
+  async fetchData() {
+    try {
+      const project = await projectDB.get(this.state.id);
+      this.setState({project: new Project(project)});
+    } catch (err) {
+      console.error('Failed to get project', err);
+    }
   }
 
   render() {
-    // TODO: Don't pass in project, needs to be serializable, pass in id and fetch here
-    const params: Project = this.props.route.params;
-    const duration = params.duration.toFormat('h');
+    if (this.state.project === undefined) {
+      return <LoadingIcon />;
+    }
+
+    const project = this.state.project;
+    const duration = project.duration;
     return (
       <ScrollView>
-        <OverrideColor color={params.color}>
-          <Title>{params.name}</Title>
+        <OverrideColor color={project.color}>
+          <Title>{project.name}</Title>
         </OverrideColor>
         <Text>{duration === 'PT0S' ? '0' : duration} hours</Text>
         <Button icon="play">Start work</Button>
@@ -73,18 +91,10 @@ class ProjectListView extends React.Component<any, ProjectState> {
         include_docs: true,
         descending: true,
       });
-      console.log(results);
+      console.log('Got ' + results.total_rows + ' projects');
       this.setState({
         loading: false,
-        projects: results.rows.map((row) => {
-          const doc = row.doc as ProjectDB;
-          return {
-            _id: doc._id,
-            name: doc.name,
-            color: doc.color,
-            duration: Duration.fromISO(doc.duration),
-          };
-        }),
+        projects: results.rows.map((row) => new Project(row.doc as ProjectDB)),
       });
     } catch (err) {
       this.setState({loading: false});
@@ -102,18 +112,19 @@ class ProjectListView extends React.Component<any, ProjectState> {
   render() {
     return (
       <ScrollView>
+        {this.state.loading ? <LoadingIcon /> : null}
         {this.state.projects.map((project) => (
           <Card
             key={project._id}
             style={projectViewStyle.projectCard}
             onPress={() => {
-              this.props.navigation.navigate('project', project);
+              this.props.navigation.navigate('project', project._id);
             }}>
             <OverrideColor color={project.color}>
               <Card.Title title={project.name} />
             </OverrideColor>
             <Card.Content>
-              <Paragraph>12 hours this week</Paragraph>
+              <Paragraph>{project.duration} hours this week</Paragraph>
             </Card.Content>
           </Card>
         ))}
