@@ -32,11 +32,11 @@ import {
 import {NavigationContainer} from '@react-navigation/native';
 import {createMaterialBottomTabNavigator} from '@react-navigation/material-bottom-tabs';
 import {Appearance} from 'react-native-appearance';
-import './database';
-import Home from './Home';
-import ProjectView from './ProjectView';
-import Stats from './Stats';
-import {HeaderBar} from './ActionBars';
+import './src/Database';
+import Home from './src/Home';
+import ProjectView from './src/project/ProjectView';
+import Stats from './src/Stats';
+import {HeaderBar} from './src/ActionBars';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 //const Stack = createStackNavigator();

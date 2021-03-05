@@ -1,80 +1,25 @@
 import React from 'react';
-import {projectDB, Project, ProjectDB} from './database';
-import {Card, Paragraph, Title, Text, Button} from 'react-native-paper';
-import {StyleSheet, ScrollView} from 'react-native';
+import {Project, ProjectDB, projectDB} from '../Database';
+import {ScrollView, StyleSheet} from 'react-native';
+import {LoadingIcon} from '../Loading';
+import {Card, Paragraph} from 'react-native-paper';
+import OverrideColor from '../OverrideColor';
 import {AddProjectButton} from './AddProjectButton';
-import OverrideColor from './OverrideColor';
-import {createStackNavigator} from '@react-navigation/stack';
 import {DateTime, Duration} from 'luxon';
-import {LoadingIcon} from './loading';
 
-type ProjectState = {
+type State = {
   loading: boolean;
   addProjectDialog: boolean;
   projects: Project[];
 };
 
-const projectViewStyle = StyleSheet.create({
+const style = StyleSheet.create({
   projectCard: {
     margin: 16,
   },
 });
 
-const StackNavigator = createStackNavigator();
-
-export default function ProjectView() {
-  return (
-    <StackNavigator.Navigator initialRouteName="listprojects" headerMode="none">
-      <StackNavigator.Screen name="listprojects" component={ProjectListView} />
-      <StackNavigator.Screen name="project" component={ProjectSingleView} />
-    </StackNavigator.Navigator>
-  );
-}
-
-type ProjectSingleState = {
-  id: string;
-  project: Project | undefined;
-};
-
-class ProjectSingleView extends React.Component<any, ProjectSingleState> {
-  constructor(props: any) {
-    super(props);
-    this.state = {id: props.route.params, project: undefined};
-  }
-
-  componentDidMount() {
-    this.fetchData();
-  }
-
-  async fetchData() {
-    try {
-      const project = await projectDB.get(this.state.id);
-      this.setState({project: new Project(project)});
-    } catch (err) {
-      console.error('Failed to get project', err);
-    }
-  }
-
-  render() {
-    if (this.state.project === undefined) {
-      return <LoadingIcon />;
-    }
-
-    const project = this.state.project;
-    const duration = project.duration;
-    return (
-      <ScrollView>
-        <OverrideColor color={project.color}>
-          <Title>{project.name}</Title>
-        </OverrideColor>
-        <Text>{duration === 'PT0S' ? '0' : duration} hours</Text>
-        <Button icon="play">Start work</Button>
-      </ScrollView>
-    );
-  }
-}
-
-class ProjectListView extends React.Component<any, ProjectState> {
+export class ProjectListView extends React.Component<any, State> {
   constructor(props: any) {
     super(props);
     this.state = {loading: true, addProjectDialog: false, projects: []};
@@ -116,7 +61,7 @@ class ProjectListView extends React.Component<any, ProjectState> {
         {this.state.projects.map((project) => (
           <Card
             key={project._id}
-            style={projectViewStyle.projectCard}
+            style={style.projectCard}
             onPress={() => {
               this.props.navigation.navigate('project', project._id);
             }}>

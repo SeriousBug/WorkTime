@@ -1,9 +1,6 @@
-import React, {useState} from 'react';
+import React from 'react';
 import {LineChart} from 'react-native-chart-kit';
 import Dimensions from 'react-native/Libraries/Utilities/Dimensions';
-import {FooterBar, HeaderBar} from './ActionBars';
-
-import {Project} from './database';
 
 export default function Home() {
   return (

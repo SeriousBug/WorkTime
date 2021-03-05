@@ -8,8 +8,8 @@ import {
   useTheme,
 } from 'react-native-paper';
 import {StyleSheet, View} from 'react-native';
-import OverrideColor from './OverrideColor';
-import {getColor, ThemedColor, allColors} from './color';
+import OverrideColor from '../OverrideColor';
+import {getColor, ThemedColor, allColors} from '../color';
 
 export type AddProjectButtonProps = {
   disabled: boolean;
