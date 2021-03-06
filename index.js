@@ -38,6 +38,8 @@ import ProjectView from './src/project/ProjectView';
 import Stats from './src/Stats';
 import {HeaderBar} from './src/ActionBars';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import PouchDB from '@craftzdog/pouchdb-core-react-native';
+import {Provider as DBProvider} from 'use-pouchdb';
 
 //const Stack = createStackNavigator();
 const Tab = createMaterialBottomTabNavigator();
@@ -93,6 +95,10 @@ export class Main extends React.Component {
     this.state = {
       theme: this.getTheme(Appearance.getColorScheme()),
       colorSchemeListener: colorSchemeListener,
+      db: {
+        project: new PouchDB('project', {adapter: 'react-native-sqlite'}),
+        timelog: new PouchDB('timelog', {adapter: 'react-native-sqlite'}),
+      },
     };
   }
 
@@ -107,34 +113,36 @@ export class Main extends React.Component {
   render() {
     return (
       <PaperProvider theme={this.state.theme}>
-        <NavigationContainer theme={this.state.theme}>
-          <Tab.Navigator
-            initialRouteName="Home"
-            backBehavior="initialRoute"
-            screenOptions={{header: (props) => <HeaderBar {...props} />}}>
-            <Tab.Screen
-              name="Home"
-              options={{
-                tabBarIcon: this.tabIcon('home'),
-              }}
-              component={Home}
-            />
-            <Tab.Screen
-              name="Project"
-              options={{
-                tabBarIcon: this.tabIcon('briefcase-clock'),
-              }}
-              component={ProjectView}
-            />
-            <Tab.Screen
-              name="Stats"
-              options={{
-                tabBarIcon: this.tabIcon('chart-line'),
-              }}
-              component={Stats}
-            />
-          </Tab.Navigator>
-        </NavigationContainer>
+        <DBProvider databases={this.state.db} default={'project'}>
+          <NavigationContainer theme={this.state.theme}>
+            <Tab.Navigator
+              initialRouteName="Home"
+              backBehavior="initialRoute"
+              screenOptions={{header: (props) => <HeaderBar {...props} />}}>
+              <Tab.Screen
+                name="Home"
+                options={{
+                  tabBarIcon: this.tabIcon('home'),
+                }}
+                component={Home}
+              />
+              <Tab.Screen
+                name="Project"
+                options={{
+                  tabBarIcon: this.tabIcon('briefcase-clock'),
+                }}
+                component={ProjectView}
+              />
+              <Tab.Screen
+                name="Stats"
+                options={{
+                  tabBarIcon: this.tabIcon('chart-line'),
+                }}
+                component={Stats}
+              />
+            </Tab.Navigator>
+          </NavigationContainer>
+        </DBProvider>
       </PaperProvider>
     );
   }

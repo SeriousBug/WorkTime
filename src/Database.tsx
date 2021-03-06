@@ -7,6 +7,7 @@ import PouchDB from '@craftzdog/pouchdb-core-react-native';
 import {ThemedColor} from './color';
 import {DateTime, Duration} from 'luxon';
 PouchDB.plugin(SQLiteAdapter);
+PouchDB.plugin(require('pouchdb-find'));
 
 export class Project {
   _id: string;
@@ -51,21 +52,32 @@ export type ProjectDB = {
   duration: string;
 };
 
-export type TimeLog = {
+export class TimeLog {
   _id: string;
+  private project_id: string;
   start: DateTime;
   end: DateTime;
-};
+
+  constructor(dbObject: TimeLogDB) {
+    this._id = dbObject._id;
+    this.project_id = dbObject.project_id;
+    this.start = DateTime.fromISO(dbObject.start);
+    this.end = DateTime.fromISO(dbObject.end);
+  }
+
+  toJSON(): TimeLogDB {
+    return {
+      _id: this._id,
+      project_id: this.project_id,
+      start: this.start.toISO(),
+      end: this.end.toISO(),
+    };
+  }
+}
 
 export type TimeLogDB = {
   _id: string;
+  project_id: string;
   start: string;
   end: string;
 };
-
-export const projectDB = new PouchDB<ProjectDB>('project', {
-  adapter: 'react-native-sqlite',
-});
-export const timeLogDB = new PouchDB<TimeLogDB>('timelog', {
-  adapter: 'react-native-sqlite',
-});

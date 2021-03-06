@@ -10,12 +10,9 @@ import {
 import {StyleSheet, View} from 'react-native';
 import OverrideColor from '../OverrideColor';
 import {getColor, ThemedColor, allColors} from '../color';
-
-export type AddProjectButtonProps = {
-  disabled: boolean;
-  projectsLength: number;
-  addProjectCallback: (name: string, color: ThemedColor) => void;
-};
+import {usePouch} from 'use-pouchdb';
+import {ProjectDB} from '../Database';
+import {DateTime, Duration} from 'luxon';
 
 const style = StyleSheet.create({
   container: {
@@ -34,10 +31,11 @@ const style = StyleSheet.create({
 
 const DEFAULT_COLOR = 'blue';
 
-export function AddProjectButton(props: AddProjectButtonProps) {
+export function AddProjectButton() {
   const [visible, setVisible] = useState(false);
   const [name, setName] = useState('');
   const [color, setColor] = useState(getColor(DEFAULT_COLOR));
+  const projectDB = usePouch<ProjectDB>('project');
 
   const theme = useTheme();
 
@@ -63,7 +61,6 @@ export function AddProjectButton(props: AddProjectButtonProps) {
     <View style={style.container}>
       <Button
         icon="plus"
-        disabled={props.disabled}
         onPress={() => {
           setVisible(true);
         }}>
@@ -88,7 +85,19 @@ export function AddProjectButton(props: AddProjectButtonProps) {
               style={style.dialogButton}
               disabled={name === ''}
               onPress={() => {
-                props.addProjectCallback(name, color);
+                projectDB
+                  .put({
+                    _id: DateTime.now().toISO(),
+                    name: name,
+                    color: color,
+                    duration: Duration.fromMillis(0).toISO(),
+                  })
+                  .then((res) => {
+                    console.log(res);
+                  })
+                  .catch((err) => {
+                    console.error(err);
+                  });
                 reset();
               }}>
               OK

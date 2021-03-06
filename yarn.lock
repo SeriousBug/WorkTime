@@ -1466,6 +1466,14 @@
     "@types/prop-types" "*"
     csstype "^3.0.2"
 
+"@types/react@^16.9.55":
+  version "16.14.4"
+  resolved "https://registry.yarnpkg.com/@types/react/-/react-16.14.4.tgz#365f6a1e117d1eec960ba792c7e1e91ecad38e6f"
+  integrity sha512-ETj7GbkPGjca/A4trkVeGvoIakmLV6ZtX3J8dcmOpzKzWVybbrOxanwaIPG71GZwImoMDY6Fq4wIe34lEqZ0FQ==
+  dependencies:
+    "@types/prop-types" "*"
+    csstype "^3.0.2"
+
 "@types/stack-utils@^1.0.1":
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/@types/stack-utils/-/stack-utils-1.0.1.tgz#0a851d3bd96498fa25c33ab7278ed3bd65f06c3e"
@@ -3326,7 +3334,7 @@ fast-base64-decode@^1.0.0:
   resolved "https://registry.yarnpkg.com/fast-base64-decode/-/fast-base64-decode-1.0.0.tgz#b434a0dd7d92b12b43f26819300d2dafb83ee418"
   integrity sha512-qwaScUgUGBYeDNRnbc/KyllVU88Jk1pRHPStuF/lO7B0/RTRLj7U0lkdTAutlBblY08rwZDff6tNU9cjv6j//Q==
 
-fast-deep-equal@^3.1.1:
+fast-deep-equal@^3.1.1, fast-deep-equal@^3.1.3:
   version "3.1.3"
   resolved "https://registry.yarnpkg.com/fast-deep-equal/-/fast-deep-equal-3.1.3.tgz#3a7d56b559d6cbc3eb512325244e619a65c6c525"
   integrity sha512-f3qQ9oQy9j2AhBe/H9VC91wLmKBCCU/gDOnKNAYG5hswO7BLKj09Hc5HYNz9cGI++xlpDCIgDaitVs03ATR84Q==
@@ -6181,7 +6189,7 @@ pouchdb-binary-utils@7.2.2, pouchdb-binary-utils@^7.2.2:
   dependencies:
     buffer-from "1.1.1"
 
-pouchdb-changes-filter@^7.2.2:
+pouchdb-changes-filter@7.2.2, pouchdb-changes-filter@^7.2.2:
   version "7.2.2"
   resolved "https://registry.yarnpkg.com/pouchdb-changes-filter/-/pouchdb-changes-filter-7.2.2.tgz#e4d1ad5a9b57bd2d756e1ee2814463c4a91822b6"
   integrity sha512-1txJnTtL/C7zrq+spLt3pH9EDHTWmLLwp2zx8zUQrkt6eQtuLuXUI7G84xe+hfpU0rQvUzp/APYMnko0/6Rw0A==
@@ -6207,6 +6215,20 @@ pouchdb-collections@7.2.2, pouchdb-collections@^7.2.2:
   version "7.2.2"
   resolved "https://registry.yarnpkg.com/pouchdb-collections/-/pouchdb-collections-7.2.2.tgz#aeed77f33322429e3f59d59ea233b48ff0e68572"
   integrity sha512-6O9zyAYlp3UdtfneiMYuOCWdUCQNo2bgdjvNsMSacQX+3g8WvIoFQCYJjZZCpTttQGb+MHeRMr8m2U95lhJTew==
+
+pouchdb-core@^7.2.2:
+  version "7.2.2"
+  resolved "https://registry.yarnpkg.com/pouchdb-core/-/pouchdb-core-7.2.2.tgz#519402cf0fcaffcc903db9d484d901fc9dde33d5"
+  integrity sha512-AnMmSH+xx12Vk6oASDRQoElXfV9fSn8MIwfus0oa2lqkxowx4bvidofZbhZfKEiE6QgKwFEOBzs56MS3znI8TQ==
+  dependencies:
+    argsarray "0.0.1"
+    inherits "2.0.4"
+    pouchdb-changes-filter "7.2.2"
+    pouchdb-collections "7.2.2"
+    pouchdb-errors "7.2.2"
+    pouchdb-fetch "7.2.2"
+    pouchdb-merge "7.2.2"
+    pouchdb-utils "7.2.2"
 
 pouchdb-errors@7.2.2, pouchdb-errors@^7.2.2:
   version "7.2.2"
@@ -7881,6 +7903,20 @@ urix@^0.1.0:
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/urix/-/urix-0.1.0.tgz#da937f7a62e21fec1fd18d49b35c2935067a6c72"
   integrity sha1-2pN/emLiH+wf0Y1Js1wpNQZ6bHI=
+
+use-pouchdb@^1.2.3:
+  version "1.2.3"
+  resolved "https://registry.yarnpkg.com/use-pouchdb/-/use-pouchdb-1.2.3.tgz#2de1e7e56413cc942811698eb79fa967861ce84d"
+  integrity sha512-C7laZ8PcELrDtkSSjMr10k2rCSCRFZt9ZGfA5/z/0xic6pUnK+OK49uin4M6acBKeHNKlP0MVa27JrlB/3Phdw==
+  dependencies:
+    "@types/pouchdb-core" "^7.0.6"
+    "@types/pouchdb-find" "^6.3.6"
+    "@types/pouchdb-mapreduce" "^6.1.4"
+    "@types/react" "^16.9.55"
+    fast-deep-equal "^3.1.3"
+    pouchdb-core "^7.2.2"
+    pouchdb-errors "^7.2.2"
+    pouchdb-utils "^7.2.2"
 
 use-subscription@^1.0.0:
   version "1.5.1"
