@@ -54,7 +54,7 @@ export type ProjectDB = {
 
 export class TimeLog {
   _id: string;
-  private project_id: string;
+  project_id: string;
   start: DateTime;
   end: DateTime;
 

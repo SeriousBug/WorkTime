@@ -92,12 +92,25 @@ export class Main extends React.Component {
         this.setState({theme: this.getTheme(colorScheme)});
       },
     );
+    let timelogDB = new PouchDB('timelog', {adapter: 'react-native-sqlite'});
+    timelogDB
+      .createIndex({
+        index: {
+          fields: ['project_id', '_id'],
+        },
+      })
+      .then((res) => {
+        console.log('Index ready', res);
+      })
+      .catch((err) => {
+        console.error(err);
+      });
     this.state = {
       theme: this.getTheme(Appearance.getColorScheme()),
       colorSchemeListener: colorSchemeListener,
       db: {
         project: new PouchDB('project', {adapter: 'react-native-sqlite'}),
-        timelog: new PouchDB('timelog', {adapter: 'react-native-sqlite'}),
+        timelog: timelogDB,
       },
     };
   }
