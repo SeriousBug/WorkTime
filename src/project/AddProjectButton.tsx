@@ -8,7 +8,6 @@ import {
   useTheme,
 } from 'react-native-paper';
 import {StyleSheet, View} from 'react-native';
-import OverrideColor from '../OverrideColor';
 import {getColor, ThemedColor, allColors} from '../color';
 import {usePouch} from 'use-pouchdb';
 import {ProjectDB} from '../Database';
@@ -68,9 +67,10 @@ export function AddProjectButton() {
       </Button>
       <Portal>
         <Dialog visible={visible} onDismiss={reset}>
-          <OverrideColor color={color}>
-            <Dialog.Title>Add Project</Dialog.Title>
-          </OverrideColor>
+          <Dialog.Title
+            theme={{colors: {text: theme.dark ? color.dark : color.light}}}>
+            Add Project
+          </Dialog.Title>
           <Dialog.Content>
             <TextInput label="Project name" onChangeText={setName} />
             <View style={style.colorButtonList}>

@@ -2,12 +2,13 @@ import React from 'react';
 import {Project, ProjectDB, TimeLog, TimeLogDB} from '../Database';
 import {LoadingIcon} from '../Loading';
 import {ScrollView} from 'react-native';
-import OverrideColor from '../OverrideColor';
-import {Button, Text, Title} from 'react-native-paper';
+import {Button, Text, Title, useTheme} from 'react-native-paper';
 import {useDoc, usePouch} from 'use-pouchdb';
 import {useTimer} from '../Timer';
 import {DateTime} from 'luxon';
-import {useFind} from './Find';
+import {useFind} from '../Find';
+import {getThemeColor} from '../color';
+import {ProjectDuration} from './ProjectDuration';
 
 export function ProjectSingleView(props: any) {
   const id = props.route.params.id;
@@ -17,6 +18,7 @@ export function ProjectSingleView(props: any) {
     sort: [{_id: 'desc'}],
     limit: 1,
   });
+  const theme = useTheme();
 
   // TODO: Check if projectR.error || lastTimeLogR.error, and show an error to user'
   if (projectR.doc === null || lastTimeLogR.loading) {
@@ -30,24 +32,28 @@ export function ProjectSingleView(props: any) {
     lastTimeLogR.docs.length === 0 ||
     lastTimeLogR.docs[0].end !== ''
   ) {
-    // Not currently working
+    // User is not currently working
     return (
       <ScrollView>
-        <OverrideColor color={project.color}>
-          <Title>{project.name}</Title>
-        </OverrideColor>
-        <Text>{project.duration} hours</Text>
+        <Title style={{color: getThemeColor(theme, project.color)}}>
+          {project.name}
+        </Title>
+        <ProjectDuration projectID={project._id} />
         <StartWorkButton projectID={project._id} />
       </ScrollView>
     );
   } else {
-    // Currently working, there is a lastTimeLog and it has no end time recorded
+    // User is currently working, there is a lastTimeLog and it has no end time recorded
+    const lastTimeLogDoc = lastTimeLogR.docs[0];
+    const lastTimeLog = new TimeLog(lastTimeLogDoc);
     return (
-      <ProjectWorkingView
-        project={project}
-        rev={lastTimeLogR.docs[0]._rev}
-        lastTimeLog={new TimeLog(lastTimeLogR.docs[0])}
-      />
+      <ScrollView>
+        <Title style={{color: getThemeColor(theme, project.color)}}>
+          {project.name}
+        </Title>
+        <Timer start={lastTimeLog.start} />
+        <EndWorkButton rev={lastTimeLogDoc._rev} lastTimeLog={lastTimeLog} />
+      </ScrollView>
     );
   }
 }
@@ -78,25 +84,9 @@ function StartWorkButton({projectID}: {projectID: string}) {
   );
 }
 
-function ProjectWorkingView({
-  lastTimeLog,
-  rev,
-  project,
-}: {
-  lastTimeLog: TimeLog;
-  rev: string;
-  project: Project;
-}) {
+function Timer({start}: {start: DateTime}) {
   useTimer(1000); // Forces this component to update every second
-  return (
-    <ScrollView>
-      <OverrideColor color={project.color}>
-        <Title>{project.name}</Title>
-      </OverrideColor>
-      <Text>{DateTime.now().diff(lastTimeLog.start).toFormat('hh:mm:ss')}</Text>
-      <EndWorkButton rev={rev} lastTimeLog={lastTimeLog} />
-    </ScrollView>
-  );
+  return <Text>{DateTime.now().diff(start).toFormat('hh:mm:ss')}</Text>;
 }
 
 function EndWorkButton({

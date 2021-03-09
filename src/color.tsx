@@ -108,4 +108,12 @@ export function getColor(key: ColorNames): ThemedColor {
   // Because of how COLOR and key are defined, undefined is impossible
   return COLOR.get(key) as ThemedColor;
 }
+
+export function getThemeColor(
+  theme: ReactNativePaper.Theme,
+  color: ThemedColor,
+): string {
+  return theme.dark ? color.dark : color.light;
+}
+
 export const allColors = Array.from(COLOR.values());

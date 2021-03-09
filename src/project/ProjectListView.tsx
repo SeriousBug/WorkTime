@@ -2,11 +2,12 @@ import React from 'react';
 import {Project, ProjectDB} from '../Database';
 import {ScrollView, StyleSheet} from 'react-native';
 import {LoadingIcon} from '../Loading';
-import {Card, Paragraph} from 'react-native-paper';
-import OverrideColor from '../OverrideColor';
+import {Card, useTheme} from 'react-native-paper';
 import {AddProjectButton} from './AddProjectButton';
 import {useAllDocs} from 'use-pouchdb';
 import {useNavigation} from '@react-navigation/native';
+import {getThemeColor} from '../color';
+import {ProjectDuration} from './ProjectDuration';
 
 const style = StyleSheet.create({
   projectCard: {
@@ -17,6 +18,7 @@ const style = StyleSheet.create({
 export function ProjectListView() {
   const navigation = useNavigation();
   const projectsR = useAllDocs<ProjectDB>({db: 'project', include_docs: true});
+  let theme = useTheme();
 
   if (projectsR.loading) {
     return (
@@ -31,21 +33,24 @@ export function ProjectListView() {
 
   return (
     <ScrollView>
-      {projects.map((project) => (
-        <Card
-          key={project._id}
-          style={style.projectCard}
-          onPress={() => {
-            navigation.navigate('project', {id: project._id});
-          }}>
-          <OverrideColor color={project.color}>
-            <Card.Title title={project.name} />
-          </OverrideColor>
-          <Card.Content>
-            <Paragraph>{project.duration} hours this week</Paragraph>
-          </Card.Content>
-        </Card>
-      ))}
+      {projects.map((project) => {
+        return (
+          <Card
+            key={project._id}
+            style={style.projectCard}
+            onPress={() => {
+              navigation.navigate('project', {id: project._id});
+            }}>
+            <Card.Title
+              titleStyle={{color: getThemeColor(theme, project.color)}}
+              title={project.name}
+            />
+            <Card.Content>
+              <ProjectDuration projectID={project._id} />
+            </Card.Content>
+          </Card>
+        );
+      })}
       <AddProjectButton />
     </ScrollView>
   );
