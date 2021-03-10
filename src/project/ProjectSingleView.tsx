@@ -2,15 +2,7 @@ import React, {useState} from 'react';
 import {Project, ProjectDB, TimeLog, TimeLogDB} from '../Database';
 import {LoadingIcon} from '../Loading';
 import {ScrollView} from 'react-native';
-import {
-  Button,
-  Modal,
-  Portal,
-  Text,
-  TextInput,
-  Title,
-  useTheme,
-} from 'react-native-paper';
+import {Button, Modal, Portal, Text, Title, useTheme} from 'react-native-paper';
 import {useDoc, usePouch} from 'use-pouchdb';
 import {useTimer} from '../Timer';
 import {DateTime} from 'luxon';
@@ -146,7 +138,7 @@ function RecordPreviousWorkButton({project}: {project: Project}) {
   const theme = useTheme();
   const db = usePouch<TimeLogDB>('timelog');
   if (project === null) {
-    return <></>;
+    return <LoadingIcon />;
   }
   return (
     <>
@@ -175,8 +167,15 @@ function RecordPreviousWorkButton({project}: {project: Project}) {
           </Button>
           <Button
             onPress={() => {
-              setShowDialog(false); /* TODO: Add the log */
-              console.log(startTime, endTime);
+              setShowDialog(false);
+              if (startTime !== undefined && endTime !== undefined) {
+                db.put({
+                  _id: startTime.toISO(),
+                  project_id: project._id,
+                  start: startTime.toISO(),
+                  end: endTime.toISO(),
+                });
+              }
             }}>
             OK
           </Button>
@@ -186,7 +185,10 @@ function RecordPreviousWorkButton({project}: {project: Project}) {
   );
 }
 
-function useDateTimePicker(name: string, initial?: DateTime) {
+function useDateTimePicker(
+  name: string,
+  initial?: DateTime,
+): [DateTime | undefined, React.FC] {
   const [show, setShow] = useState(false);
   const [picked, setPicked] = useState<DateTime | undefined>(initial);
 
