@@ -14,7 +14,6 @@ export function ProjectDuration({projectID}: {projectID: string}) {
   if (logs.docs === undefined) {
     return <Text>Loading...</Text>;
   }
-  console.log(logs);
   const duration = logs.docs
     .filter((doc) => doc.end !== '' && doc.start !== '')
     .map((doc) => DateTime.fromISO(doc.end).diff(DateTime.fromISO(doc.start)))

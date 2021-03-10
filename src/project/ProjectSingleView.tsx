@@ -1,14 +1,24 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {Project, ProjectDB, TimeLog, TimeLogDB} from '../Database';
 import {LoadingIcon} from '../Loading';
 import {ScrollView} from 'react-native';
-import {Button, Text, Title, useTheme} from 'react-native-paper';
+import {
+  Button,
+  Modal,
+  Portal,
+  Text,
+  TextInput,
+  Title,
+  useTheme,
+} from 'react-native-paper';
 import {useDoc, usePouch} from 'use-pouchdb';
 import {useTimer} from '../Timer';
 import {DateTime} from 'luxon';
 import {useFind} from '../Find';
 import {getThemeColor} from '../color';
 import {ProjectDuration} from './ProjectDuration';
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
+import {View} from 'react-native';
 
 export function ProjectSingleView(props: any) {
   const id = props.route.params.id;
@@ -40,6 +50,7 @@ export function ProjectSingleView(props: any) {
         </Title>
         <ProjectDuration projectID={project._id} />
         <StartWorkButton projectID={project._id} />
+        <RecordPreviousWorkButton project={project} />
       </ScrollView>
     );
   } else {
@@ -122,4 +133,97 @@ function EndWorkButton({
       Finish work
     </Button>
   );
+}
+
+function RecordPreviousWorkButton({project}: {project: Project}) {
+  const [showDialog, setShowDialog] = useState(false);
+  const [startTime, StartTimePicker] = useDateTimePicker('Worked from');
+  const [endTime, EndTimePicker] = useDateTimePicker(
+    'Worked until',
+    DateTime.now(),
+  );
+
+  const theme = useTheme();
+  const db = usePouch<TimeLogDB>('timelog');
+  if (project === null) {
+    return <></>;
+  }
+  return (
+    <>
+      <Button
+        onPress={() => {
+          setShowDialog(true);
+        }}>
+        Record previous work
+      </Button>
+      <Portal>
+        <Modal
+          visible={showDialog}
+          onDismiss={() => {
+            setShowDialog(false);
+          }}>
+          <Text style={{color: getThemeColor(theme, project.color)}}>
+            {project.name}
+          </Text>
+          <StartTimePicker />
+          <EndTimePicker />
+          <Button
+            onPress={() => {
+              setShowDialog(false);
+            }}>
+            Cancel
+          </Button>
+          <Button
+            onPress={() => {
+              setShowDialog(false); /* TODO: Add the log */
+              console.log(startTime, endTime);
+            }}>
+            OK
+          </Button>
+        </Modal>
+      </Portal>
+    </>
+  );
+}
+
+function useDateTimePicker(name: string, initial?: DateTime) {
+  const [show, setShow] = useState(false);
+  const [picked, setPicked] = useState<DateTime | undefined>(initial);
+
+  return [
+    picked,
+    function DateTimePicker() {
+      return (
+        <View>
+          <Text>{name}</Text>
+          <Text
+            onPress={() => {
+              setShow(true);
+            }}>
+            {picked === undefined
+              ? ''
+              : picked.toLocaleString({
+                  year: 'numeric',
+                  month: 'numeric',
+                  day: 'numeric',
+                  hour: 'numeric',
+                  minute: 'numeric',
+                })}
+          </Text>
+          <DateTimePickerModal
+            isVisible={show}
+            mode="datetime"
+            onConfirm={(datetime) => {
+              setShow(false);
+              // Converting the base Date object to Luxon's DateTime for uniformity
+              setPicked(DateTime.fromISO(datetime.toISOString()));
+            }}
+            onCancel={() => {
+              setShow(false);
+            }}
+          />
+        </View>
+      );
+    },
+  ];
 }
