@@ -6,5 +6,6 @@ module.exports = {
     'prettier/prettier': 'warn',
     'max-len': ['warn', {code: 120}],
     'no-unused-vars': 'warn',
+    curly: ['error', 'multi-or-nest'],
   },
 };

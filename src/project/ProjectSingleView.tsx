@@ -1,16 +1,27 @@
-import React, {useState} from 'react';
+import React from 'react';
 import {Project, ProjectDB, TimeLog, TimeLogDB} from '../Database';
 import {LoadingIcon} from '../Loading';
-import {ScrollView} from 'react-native';
-import {Button, Modal, Portal, Text, Title, useTheme} from 'react-native-paper';
+import {ScrollView, StyleSheet, View} from 'react-native';
+import {Button, Text, Title, useTheme} from 'react-native-paper';
 import {useDoc, usePouch} from 'use-pouchdb';
 import {useTimer} from '../Timer';
 import {DateTime} from 'luxon';
 import {useFind} from '../Find';
 import {getThemeColor} from '../color';
 import {ProjectDuration} from './ProjectDuration';
-import DateTimePickerModal from 'react-native-modal-datetime-picker';
-import {View} from 'react-native';
+import {RecordPreviousWorkButton} from './RecordPreviousWorkButton';
+
+const style = StyleSheet.create({
+  container: {padding: 60},
+  title: {fontSize: 40, lineHeight: 40},
+  titleContainer: {height: 60},
+  modal: {},
+  timer: {fontSize: 30},
+  button: {
+    padding: 10,
+    margin: 10,
+  },
+});
 
 export function ProjectSingleView(props: any) {
   const id = props.route.params.id;
@@ -20,12 +31,9 @@ export function ProjectSingleView(props: any) {
     sort: [{_id: 'desc'}],
     limit: 1,
   });
-  const theme = useTheme();
 
   // TODO: Check if projectR.error || lastTimeLogR.error, and show an error to user'
-  if (projectR.doc === null || lastTimeLogR.loading) {
-    return <LoadingIcon />;
-  }
+  if (projectR.doc === null || lastTimeLogR.loading) return <LoadingIcon />;
 
   const project = new Project(projectR.doc);
 
@@ -36,11 +44,9 @@ export function ProjectSingleView(props: any) {
   ) {
     // User is not currently working
     return (
-      <ScrollView>
-        <Title style={{color: getThemeColor(theme, project.color)}}>
-          {project.name}
-        </Title>
-        <ProjectDuration projectID={project._id} />
+      <ScrollView style={style.container}>
+        <ProjectTitle project={project} />
+        <ProjectDuration style={style.timer} projectID={project._id} />
         <StartWorkButton projectID={project._id} />
         <RecordPreviousWorkButton project={project} />
       </ScrollView>
@@ -50,15 +56,28 @@ export function ProjectSingleView(props: any) {
     const lastTimeLogDoc = lastTimeLogR.docs[0];
     const lastTimeLog = new TimeLog(lastTimeLogDoc);
     return (
-      <ScrollView>
-        <Title style={{color: getThemeColor(theme, project.color)}}>
-          {project.name}
-        </Title>
+      <ScrollView style={style.container}>
+        <ProjectTitle project={project} />
         <Timer start={lastTimeLog.start} />
         <EndWorkButton rev={lastTimeLogDoc._rev} lastTimeLog={lastTimeLog} />
       </ScrollView>
     );
   }
+}
+
+function ProjectTitle({project}: {project: Project}) {
+  const theme = useTheme();
+  return (
+    <View key={project._id} style={style.titleContainer}>
+      <Title
+        style={{
+          color: getThemeColor(theme, project.color),
+          ...style.title,
+        }}>
+        {project.name}
+      </Title>
+    </View>
+  );
 }
 
 function StartWorkButton({projectID}: {projectID: string}) {
@@ -67,6 +86,7 @@ function StartWorkButton({projectID}: {projectID: string}) {
   return (
     <Button
       icon="play"
+      style={style.button}
       onPress={() => {
         timelogDB
           .put({
@@ -89,7 +109,11 @@ function StartWorkButton({projectID}: {projectID: string}) {
 
 function Timer({start}: {start: DateTime}) {
   useTimer(1000); // Forces this component to update every second
-  return <Text>{DateTime.now().diff(start).toFormat('hh:mm:ss')}</Text>;
+  return (
+    <Text style={style.timer}>
+      {DateTime.now().diff(start).toFormat('hh:mm:ss')}
+    </Text>
+  );
 }
 
 function EndWorkButton({
@@ -103,6 +127,7 @@ function EndWorkButton({
 
   return (
     <Button
+      style={style.button}
       icon="stop"
       onPress={() => {
         timelogDB
@@ -125,107 +150,4 @@ function EndWorkButton({
       Finish work
     </Button>
   );
-}
-
-function RecordPreviousWorkButton({project}: {project: Project}) {
-  const [showDialog, setShowDialog] = useState(false);
-  const [startTime, StartTimePicker] = useDateTimePicker('Worked from');
-  const [endTime, EndTimePicker] = useDateTimePicker(
-    'Worked until',
-    DateTime.now(),
-  );
-
-  const theme = useTheme();
-  const db = usePouch<TimeLogDB>('timelog');
-  if (project === null) {
-    return <LoadingIcon />;
-  }
-  return (
-    <>
-      <Button
-        onPress={() => {
-          setShowDialog(true);
-        }}>
-        Record previous work
-      </Button>
-      <Portal>
-        <Modal
-          visible={showDialog}
-          onDismiss={() => {
-            setShowDialog(false);
-          }}>
-          <Text style={{color: getThemeColor(theme, project.color)}}>
-            {project.name}
-          </Text>
-          <StartTimePicker />
-          <EndTimePicker />
-          <Button
-            onPress={() => {
-              setShowDialog(false);
-            }}>
-            Cancel
-          </Button>
-          <Button
-            onPress={() => {
-              setShowDialog(false);
-              if (startTime !== undefined && endTime !== undefined) {
-                db.put({
-                  _id: startTime.toISO(),
-                  project_id: project._id,
-                  start: startTime.toISO(),
-                  end: endTime.toISO(),
-                });
-              }
-            }}>
-            OK
-          </Button>
-        </Modal>
-      </Portal>
-    </>
-  );
-}
-
-function useDateTimePicker(
-  name: string,
-  initial?: DateTime,
-): [DateTime | undefined, React.FC] {
-  const [show, setShow] = useState(false);
-  const [picked, setPicked] = useState<DateTime | undefined>(initial);
-
-  return [
-    picked,
-    function DateTimePicker() {
-      return (
-        <View>
-          <Text>{name}</Text>
-          <Text
-            onPress={() => {
-              setShow(true);
-            }}>
-            {picked === undefined
-              ? ''
-              : picked.toLocaleString({
-                  year: 'numeric',
-                  month: 'numeric',
-                  day: 'numeric',
-                  hour: 'numeric',
-                  minute: 'numeric',
-                })}
-          </Text>
-          <DateTimePickerModal
-            isVisible={show}
-            mode="datetime"
-            onConfirm={(datetime) => {
-              setShow(false);
-              // Converting the base Date object to Luxon's DateTime for uniformity
-              setPicked(DateTime.fromISO(datetime.toISOString()));
-            }}
-            onCancel={() => {
-              setShow(false);
-            }}
-          />
-        </View>
-      );
-    },
-  ];
 }
