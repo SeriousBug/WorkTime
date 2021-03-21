@@ -1,8 +1,8 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {Project, ProjectDB, TimeLog, TimeLogDB} from '../Database';
 import {LoadingIcon} from '../Loading';
 import {ScrollView, StyleSheet, View} from 'react-native';
-import {Button, Text, Title, useTheme} from 'react-native-paper';
+import {Button, Modal, Portal, Text, Title, useTheme} from 'react-native-paper';
 import {useDoc, usePouch} from 'use-pouchdb';
 import {useTimer} from '../Timer';
 import {DateTime} from 'luxon';
@@ -10,6 +10,7 @@ import {useFind} from '../Find';
 import {getThemeColor} from '../color';
 import {ProjectDuration} from './ProjectDuration';
 import {RecordPreviousWorkButton} from './RecordPreviousWorkButton';
+import {useNavigation} from '@react-navigation/native';
 
 const style = StyleSheet.create({
   container: {padding: 60},
@@ -49,6 +50,7 @@ export function ProjectSingleView(props: any) {
         <ProjectDuration style={style.timer} projectID={project._id} />
         <StartWorkButton projectID={project._id} />
         <RecordPreviousWorkButton project={project} />
+        <DeleteProjectButton project={projectR.doc} />
       </ScrollView>
     );
   } else {
@@ -149,5 +151,62 @@ function EndWorkButton({
       }}>
       Finish work
     </Button>
+  );
+}
+
+function DeleteProjectButton({
+  project,
+}: {
+  project: PouchDB.Core.ExistingDocument<ProjectDB>;
+}) {
+  const [show, setShow] = useState(false);
+  const theme = useTheme();
+  const db = usePouch<ProjectDB>('project');
+  const nav = useNavigation();
+
+  return (
+    <>
+      <Button
+        style={style.button}
+        onPress={() => {
+          setShow(true);
+        }}>
+        Delete project
+      </Button>
+      <Portal>
+        <Modal
+          style={{backgroundColor: 'rgba(0, 0, 0, .8)'}}
+          visible={show}
+          onDismiss={() => {
+            setShow(false);
+          }}>
+          <Text style={{textAlign: 'center'}}>
+            Delete project{' '}
+            <Text
+              style={{
+                color: getThemeColor(theme, project.color),
+              }}>
+              {project.name}
+            </Text>
+          </Text>
+
+          <Button
+            onPress={() => {
+              setShow(false);
+            }}>
+            Cancel
+          </Button>
+          <Button
+            onPress={() => {
+              setShow(false);
+              db.remove(project);
+              if (nav.canGoBack()) nav.goBack();
+              else nav.navigate('listprojects');
+            }}>
+            Delete
+          </Button>
+        </Modal>
+      </Portal>
+    </>
   );
 }

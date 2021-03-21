@@ -1,5 +1,4 @@
 import {usePouch} from 'use-pouchdb';
-import PouchDB from 'pouchdb-core';
 import {useEffect, useState} from 'react';
 
 /** Perform pouchdb.find, and also subscribe to changes on the database.
@@ -14,6 +13,9 @@ export function useFind<T>(
   dbname: string,
   request: PouchDB.Find.FindRequest<any>,
 ) {
+  // TODO: Subscription doesn't seem to be working when we update objects rather than insert new ones.
+  //       Do we also need to subscribe to each object? If so, we could add a filter param to pick
+  //       which ones to subscribe to (e.g. ongoing time records only)
   const db = usePouch<T>(dbname);
   const [response, setResponse] = useState<PouchDB.Find.FindResponse<T> | null>(
     null,
@@ -28,15 +30,12 @@ export function useFind<T>(
       );
     }
     return () => {
-      if (feed) {
-        feed.cancel();
-      }
+      if (feed) feed.cancel();
     };
   }, [feed, db]);
   useEffect(() => {
-    if (response === null) {
+    if (response === null)
       db.find(request).then(setResponse).catch(setResponse);
-    }
   }, [response, request, db]);
   return {...response, loading: response === null};
 }
