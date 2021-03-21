@@ -49,8 +49,9 @@ export function RecordPreviousWorkButton({project}: {project: Project}) {
           <Button
             onPress={() => {
               setShowDialog(false);
-              if (startTime === undefined || endTime === undefined) return;
-              if (endTime.diff(startTime).toMillis() < 0) return; //
+              if (startTime === undefined || endTime === undefined) return; // not empty
+              if (endTime.diff(startTime).toMillis() < 0) return; // not backwards
+              if (endTime.diffNow().toMillis() > 0) return; // not in the future
               db.put({
                 _id: startTime.toISO(),
                 project_id: project._id,

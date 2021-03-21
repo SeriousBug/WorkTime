@@ -1,6 +1,7 @@
 import {useEffect, useState} from 'react';
 
 export function useTimer(ms: number) {
+  // eslint-disable-next-line no-undef
   const [timer, setTimer] = useState<NodeJS.Timeout | null>(null);
   const [, setTimeElapsed] = useState(0);
   useEffect(() => {
@@ -11,9 +12,7 @@ export function useTimer(ms: number) {
       setTimer(intervalID);
     }
     return () => {
-      if (timer) {
-        clearInterval(timer);
-      }
+      if (timer) clearInterval(timer);
     };
   }, [timer, ms]);
 }

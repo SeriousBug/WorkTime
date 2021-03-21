@@ -16,10 +16,10 @@ const style = StyleSheet.create({
   title: {fontSize: 40, lineHeight: 40},
   titleContainer: {height: 60},
   modal: {},
-  timer: {fontSize: 30},
+  timer: {fontSize: 30, marginLeft: 50, marginBottom: 50},
   button: {
     padding: 10,
-    margin: 10,
+    margin: 20,
   },
 });
 

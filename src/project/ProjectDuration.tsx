@@ -19,7 +19,7 @@ export function ProjectDuration({
   const logs = useFind<TimeLogDB>('timelog', {
     selector: {project_id: {$eq: projectID}, _id: {$gt: getSince.toISO()}},
   });
-  if (logs.docs === undefined) return <Text>Loading...</Text>;
+  if (logs.docs === undefined) return <Text style={style}>Loading...</Text>;
   const duration = logs.docs
     .filter((doc) => doc.end !== '' && doc.start !== '')
     .map((doc) => DateTime.fromISO(doc.end).diff(DateTime.fromISO(doc.start)))
